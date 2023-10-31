@@ -17,7 +17,7 @@ export const FormInput = styled.input`
   color: #757575;
   text-align: center;
   background-color: #151b17;
-  width: 400px;
+  width: 300px;
   font-size: 1.2rem;
   padding: 5px;
   margin: 5px;

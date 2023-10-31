@@ -22,7 +22,17 @@ interface Book {
 }
 
 export function Form() {
-  const [books, setBooks] = useState<Book[]>([]);
+  const [books, setBooks] = useState<Book[]>([
+    {
+      id: 1,
+      title: "livro 1",
+      author: "autor 1",
+      genre: "gênero 1",
+      datePublication: "10-10-2022",
+      description: "descrição 1",
+      dateRegister: "10-10-2023",
+    },
+  ]);
 
   const currentYear = new Date().toISOString().split("T")[0];
   const [title, setTitle] = useState("");
@@ -31,6 +41,7 @@ export function Form() {
   const [datePublication, setDatePublication] = useState("");
   const [description, setDescription] = useState("");
   const [dateRegister, setDateRegister] = useState<string>(currentYear);
+  const [editMode, setEditMode] = useState(0);
 
   function setCurrentDate() {
     setDateRegister(currentYear);
@@ -46,41 +57,60 @@ export function Form() {
   }
 
   function addBook() {
-    if (
-      !title ||
-      !author ||
-      !datePublication ||
-      !description ||
-      !genre ||
-      !dateRegister
-    ) {
-      alert("Todos os campos precisam ser preenchidos");
-      return;
+    if (editMode) {
+      const newBooks = books.map((book) => {
+        if (book.id == editMode) {
+          return {
+            ...book,
+            title,
+            author,
+            genre,
+            datePublication,
+            description,
+            dateRegister,
+          };
+        }
+        return book;
+      });
+      setBooks(newBooks);
+    } else {
+      if (
+        !title ||
+        !author ||
+        !datePublication ||
+        !description ||
+        !genre ||
+        !dateRegister
+      ) {
+        alert("Todos os campos precisam ser preenchidos");
+        return;
+      }
+
+      const currentDate = moment();
+      const publicationDate = moment(datePublication, "YYYY-MM-DD");
+
+      if (publicationDate.isAfter(currentDate)) {
+        alert("A data de publicação não pode ser maior que a data atual.");
+        return;
+      }
+
+      const newBook = {
+        id: books.length + 1,
+        title,
+        author,
+        genre,
+        datePublication,
+        description,
+        dateRegister,
+      };
+      setBooks([...books, newBook]);
+      onClickClear();
     }
-
-    const currentDate = moment();
-    const publicationDate = moment(datePublication, "YYYY-MM-DD");
-
-    if (publicationDate.isAfter(currentDate)) {
-      alert("A data de publicação não pode ser maior que a data atual.");
-      return;
-    }
-
-    const newBook = {
-      id: books.length + 1,
-      title,
-      author,
-      genre,
-      datePublication,
-      description,
-      dateRegister,
-    };
-    setBooks([...books, newBook]);
-    onClickClear();
   }
 
   function updateBook(id: number) {
     const book = books.find((item) => item.id === id);
+    setEditMode(book!.id);
 
     if (book) {
       setTitle(book.title);
@@ -169,9 +199,10 @@ export function Form() {
               <Button
                 variant="PRIMARY"
                 clickFunction={addBook}
-                title="Cadastrar"
+                title={editMode ? "Editar" : "Cadastrar"}
               />
             </FormContainer>
+
             <div>
               <TableContainer>
                 <thead>
